@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rize Gençlik ve Spor İl Müdürlüğü - Kahvaltı Menüsü</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; }
+        h1 { text-align: center; color: white; margin-bottom: 10px; font-size: 1.5em; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .date-info { text-align: center; color: white; margin-bottom: 20px; font-size: 1.1em; }
+        .menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .menu-card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .menu-card.today { border: 3px solid #4CAF50; }
+        .menu-card.tomorrow { border: 3px solid #2196F3; }
+        .card-header { text-align: center; padding: 10px; border-radius: 10px; margin-bottom: 15px; }
+        .today .card-header { background: #4CAF50; color: white; }
+        .tomorrow .card-header { background: #2196F3; color: white; }
+        .card-header h2 { font-size: 1.3em; }
+        .card-header .day-name { font-size: 0.9em; opacity: 0.9; }
+        .menu-item { padding: 8px 0; border-bottom: 1px dashed #eee; display: flex; justify-content: space-between; }
+        .menu-item:last-child { border-bottom: none; }
+        .item-name { font-weight: 500; color: #333; }
+        .item-gram { color: #666; font-size: 0.9em; }
+        .energy { text-align: center; margin-top: 15px; padding: 10px; background: #fff3e0; border-radius: 8px; font-weight: bold; color: #e65100; }
+        .no-menu { text-align: center; padding: 40px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍳 Rize Gençlik ve Spor İl Müdürlüğü<br>Ocak Ayı Kahvaltı Menüsü</h1>
+        <div class="date-info" id="dateInfo"></div>
+        <div class="menu-grid" id="menuGrid"></div>
+    </div>
+<script>
+const menuData = {
+    1: { day: "Perşembe", items: [["Mıhlama", "100 g"], ["Haşlanmış Yumurta", "1 adet L boy"], ["Kaşar Peynir", "40 g"], ["Siyah/Yeşil Zeytin", "30 g"], ["Reçel Çeşitleri", "20 g"], ["Çeyrek Ekmek", ""], ["500 ml Su", ""], ["Çay/Bitki Çayı", ""]], energy: "800 kkal" },
+    2: { day: "Cuma", items: [["Peynirli Omlet", "30 g beyaz p.+ 1 yumurta"], ["Sade Poğaça", "1 adet"], ["Krem Peynir", "20 g"], ["Siyah/Yeşil Zeytin", "30 g"], ["Bal+Tereyağ", "20 g+10 g"], ["Çeyrek Ekmek", ""], ["500 ml Su", ""], ["Çay/Bitki Çayı", ""]], energy: "760 kkal" },
+    3: { day: "Cumartesi", items: [["Patates Kızartması", "150 g"], ["Haşlanmış Yumurta", "1 adet L boy"], ["Beyaz Peynir", "40 g"], ["Siyah/Yeşil Zeytin", "30 g"], ["Tahinli Pekmez", "20 g"], ["Çeyrek Ekmek", ""], ["500 ml Su", ""], ["Çay/Bitki Çayı", ""]], energy: "870 kkal" },
+    4: { day: "Pazar", items: [["Sucuklu Yumurta", "1 yumurta+ 25 g beyaz etli"], ["Kakaolu Kek", "50 g"], ["Yöresel Peynir", "40 g"], ["Siyah/Yeşil Zeytin", "30 g"], ["Salatalık ve Domates", "100 g"], ["Çeyrek Ekmek", ""], ["500 ml Su", ""], ["Çay/Bitki Çayı", ""]], energy: "730 kkal" },
+    5: { day: "Pazartesi", items: [["Karışık Pizza", "150 g"], ["Haşlanmış Yumurta", "1 adet L boy"], ["Beyaz Peynir", "40 g"], ["Siyah/Yeşil Zeytin", "30 g"], ["Reçel Çeşitleri", "20 g"], ["Çeyrek Ekmek", ""], ["500 ml Su", ""], ["Çay/Bitki Çayı", ""]], energy: "820 kkal" },
+    6: { day: "Salı", items: [["Sade Omlet", "1 adet L boy yumurta"], ["Dere Otlu Poğaça", "1 adet"], ["Kaşar Peynir", "40 g"], ["Siyah/Yeşil Zeytin", "30 g"], ["Sürülebilir Çikolata", "20 g"], ["Çeyrek Ekmek", ""], ["500 ml Su", ""], ["Çay/Bitki Çayı", ""]], energy: "750 kkal" },
+    7: { day: "Çarşamba", items: [["Karışık Kızartma", "150 g"], ["Haşlanmış Yumurta", "1 adet L boy"], ["Labne Peynir", "20 g"], ["Siyah/Yeşil Zeytin", "30 g"], ["Salatalık ve Domates", "100 g"], ["Çeyrek Ekmek", ""], ["500 ml Su", ""], ["Çay/Bitki Çayı", ""]], energy: "850 kkal" },
+    8: { day: "Perşembe", items: [["Kaşarlı Omlet", "30 g kaşar p.+ 1 yumurta"], ["Simit", "1 adet"], ["Beyaz Peynir", "40 g"], ["Siyah/Yeşil Zeytin", "30 g"], ["Helva", "40 g"], ["Çeyrek Ekmek", ""], ["500 ml Su", ""], ["Çay/Bitki Çayı", ""]], energy: "780 kkal" },
+    9: { day: "Cuma", items: [["Zeytinli/Peynirli Açma", "1 adet"], ["Haşlanmış Yumurta", "1 adet L boy"], ["Yöresel Peynir", "40 g"], ["Siyah/Yeşil Zeytin", "30 g"], ["Bal+Tereyağ", "20 g+10 g"], ["Çeyrek Ekmek", ""], ["500 ml Su", ""], ["Çay/Bitki Çayı", ""]], energy: "780 kkal" },
+    10: { day: "Cumartesi", items: [["Peynirli Omlet", "30 g beyaz p.+ 1 yumurta"], ["Çikolatalı Milföy Börek", "60 g"], ["Kaşar Peynir", "40 g"], ["Siyah/Yeşil Zeytin", "30 g"], ["Tahinli Pekmez", "20 g"], ["Çeyrek Ekmek", ""], ["500 ml Su", ""], ["Çay/Bitki Çayı", ""]], energy: "800 kkal" },
+    11: { day: "Pazar", items: [["Patates Kızartması", "150 g"], ["Haşlanmış Yumurta", "1 adet L boy"], ["Beyaz Peynir", "40 g"], ["Siyah/Yeşil Zeytin", "30 g"], ["Salatalık ve Domates", "100 g"], ["Çeyrek Ekmek", ""], ["500 ml Su", ""], ["Çay/Bitki Çayı", ""]], energy: "840 kkal" },
+    12: { day: "Pazartesi", items: [["Sucuklu Yumurta", "1 yumurta+ 25 g beyaz etli"], ["Sade Poğaça", "1 adet"], ["Kaşar Peynir", "40 g"], ["Siyah/Yeşil Zeytin", "30 g"], ["Elma", "150-200 g"], ["Çeyrek Ekmek", ""], ["500 ml Su", ""], ["Çay/Bitki Çayı", ""]], energy: "750 kkal" },
+    13: { day: "Salı", items: [["Patatesli Börek", "120 g"], ["Haşlanmış Yumurta", "1 adet L boy"], ["Beyaz Peynir", "40 g"], ["Siyah/Yeşil Zeytin", "30 g"], ["Sürülebilir Çikolata", "20 g"], ["Çeyrek Ekmek", ""], ["500 ml Su", ""], ["Çay/Bitki Çayı", ""]], energy: "820 kkal" },
+    14: { day: "Çarşamba", items: [["Sade Omlet", "1 adet L boy yumurta"], ["Simit", "1 adet"], ["Yöresel Peynir", "40 g"], ["Siyah/Yeşil Zeytin", "30 g"], ["Salatalık ve Domates", "100 g"], ["Çeyrek Ekmek", ""], ["500 ml Su", ""], ["Çay/Bitki Çayı", ""]], energy: "720 kkal" },
+    15: { day: "Perşembe", items: [["Patates Kızartması", "150 g"], ["Haşlanmış Yumurta", "1 adet L boy"], ["Beyaz Peynir", "40 g"], ["Siyah/Yeşil Zeytin", "30 g"], ["Reçel Çeşitleri", "20 g"], ["Çeyrek Ekmek", ""], ["500 ml Su", ""], ["Çay/Bitki Çayı", ""]], energy: "850 kkal" },
+    16: { day: "Cuma", items: [["Kaşarlı Omlet", "30 g kaşar p.+ 1 yumurta"], ["Patates Kroket", "60 g"], ["Kaşar Peynir", "40 g"], ["Siyah/Yeşil Zeytin", "30 g"], ["Tahinli Pekmez", "20 g"], ["Çeyrek Ekmek", ""], ["500 ml Su", ""], ["Çay/Bitki Çayı", ""]], energy: "790 kkal" },
+    17: { day: "Cumartesi", items: [["Karışık Pizza", "150 g"], ["Haşlanmış Yumurta", "1 adet L boy"], ["Beyaz Peynir", "40 g"], ["Siyah/Yeşil Zeytin", "30 g"], ["Salatalık ve Domates", "100 g"], ["Çeyrek Ekmek", ""], ["500 ml Su", ""], ["Çay/Bitki Çayı", ""]], energy: "800 kkal" },
+    18: { day: "Pazar", items: [["Patatesli Yumurta", "150 g (1 yumurta)"], ["Sade Açma", "1 adet"], ["Yöresel Peynir", "40 g"], ["Siyah/Yeşil Zeytin", "30 g"], ["Sürülebilir Çikolata", "20 g"], ["Çeyrek Ekmek", ""], ["500 ml Su", ""], ["Çay/Bitki Çayı", ""]], energy: "780 kkal" },
+    19: { day: "Pazartesi", items: [["Sosis Kokteyl", "100 g"], ["Haşlanmış Yumurta", "1 adet L boy"], ["Beyaz Peynir", "40 g"], ["Siyah/Yeşil Zeytin", "30 g"], ["Reçel Çeşitleri", "20 g"], ["Çeyrek Ekmek", ""], ["500 ml Su", ""], ["Çay/Bitki Çayı", ""]], energy: "780 kkal" },
+    20: { day: "Salı", items: [["Peynirli Omlet", "30 g beyaz p.+ 1 yumurta"], ["Dere Otlu Poğaça", "1 adet"], ["Kaşar Peynir", "40 g"], ["Siyah/Yeşil Zeytin", "30 g"], ["Bal+Tereyağ", "20 g+10 g"], ["Çeyrek Ekmek", ""], ["500 ml Su", ""], ["Çay/Bitki Çayı", ""]], energy: "750 kkal" },
+    21: { day: "Çarşamba", items: [["Patates Kızartması", "150 g"], ["Haşlanmış Yumurta", "1 adet L boy"], ["Labne Peynir", "20 g"], ["Siyah/Yeşil Zeytin", "30 g"], ["Salatalık ve Domates", "100 g"], ["Çeyrek Ekmek", ""], ["500 ml Su", ""], ["Çay/Bitki Çayı", ""]], energy: "870 kkal" },
+    22: { day: "Perşembe", items: [["Sucuklu Yumurta", "1 yumurta+ 25 g beyaz etli"], ["Simit", "1 adet"], ["Beyaz Peynir", "40 g"], ["Siyah/Yeşil Zeytin", "30 g"], ["Helva", "40 g"], ["Çeyrek Ekmek", ""], ["500 ml Su", ""], ["Çay/Bitki Çayı", ""]], energy: "760 kkal" },
+    23: { day: "Cuma", items: [["Peynirli Börek", "120 g"], ["Haşlanmış Yumurta", "1 adet L boy"], ["Kaşar Peynir", "40 g"], ["Siyah/Yeşil Zeytin", "30 g"], ["Tahinli Pekmez", "20 g"], ["Çeyrek Ekmek", ""], ["500 ml Su", ""], ["Çay/Bitki Çayı", ""]], energy: "800 kkal" },
+    24: { day: "Cumartesi", items: [["Kaşarlı Omlet", "30 g kaşar p.+ 1 yumurta"], ["Sade Kek", "50 g"], ["Beyaz Peynir", "40 g"], ["Siyah/Yeşil Zeytin", "30 g"], ["Salatalık ve Domates", "100 g"], ["Çeyrek Ekmek", ""], ["500 ml Su", ""], ["Çay/Bitki Çayı", ""]], energy: "750 kkal" },
+    25: { day: "Pazar", items: [["Patates Kızartması", "150 g"], ["Haşlanmış Yumurta", "1 adet L boy"], ["Yöresel Peynir", "40 g"], ["Siyah/Yeşil Zeytin", "30 g"], ["Sürülebilir Çikolata", "20 g"], ["Çeyrek Ekmek", ""], ["500 ml Su", ""], ["Çay/Bitki Çayı", ""]], energy: "850 kkal" },
+    26: { day: "Pazartesi", items: [["Sade Omlet", "1 adet L boy yumurta"], ["Sade Poğaça", "1 adet"], ["Beyaz Peynir", "40 g"], ["Siyah/Yeşil Zeytin", "30 g"], ["Reçel Çeşitleri", "20 g"], ["Çeyrek Ekmek", ""], ["500 ml Su", ""], ["Çay/Bitki Çayı", ""]], energy: "750 kkal" },
+    27: { day: "Salı", items: [["Patatesli Börek", "120 g"], ["Haşlanmış Yumurta", "1 adet L boy"], ["Kaşar Peynir", "40 g"], ["Siyah/Yeşil Zeytin", "30 g"], ["Bal+Tereyağ", "20 g+10 g"], ["Çeyrek Ekmek", ""], ["500 ml Su", ""], ["Çay/Bitki Çayı", ""]], energy: "820 kkal" },
+    28: { day: "Çarşamba", items: [["Karışık Kızartma", "150 g"], ["Haşlanmış Yumurta", "1 adet L boy"], ["Yöresel Peynir", "40 g"], ["Siyah/Yeşil Zeytin", "30 g"], ["Salatalık ve Domates", "100 g"], ["Çeyrek Ekmek", ""], ["500 ml Su", ""], ["Çay/Bitki Çayı", ""]], energy: "850 kkal" },
+    29: { day: "Perşembe", items: [["Kaşarlı Omlet", "30 g kaşar p.+ 1 yumurta"], ["Simit", "1 adet"], ["Beyaz Peynir", "40 g"], ["Siyah/Yeşil Zeytin", "30 g"], ["Tahinli Pekmez", "20 g"], ["Çeyrek Ekmek", ""], ["500 ml Su", ""], ["Çay/Bitki Çayı", ""]], energy: "780 kkal" },
+    30: { day: "Cuma", items: [["Peynirli Börek", "120 g"], ["Haşlanmış Yumurta", "1 adet L boy"], ["Kaşar Peynir", "40 g"], ["Siyah/Yeşil Zeytin", "30 g"], ["Helva", "40 g"], ["Çeyrek Ekmek", ""], ["500 ml Su", ""], ["Çay/Bitki Çayı", ""]], energy: "800 kkal" },
+    31: { day: "Cumartesi", items: [["Patates Kızartması", "150 g"], ["Haşlanmış Yumurta", "1 adet L boy"], ["Beyaz Peynir", "40 g"], ["Siyah/Yeşil Zeytin", "30 g"], ["Salatalık ve Domates", "100 g"], ["Çeyrek Ekmek", ""], ["500 ml Su", ""], ["Çay/Bitki Çayı", ""]], energy: "870 kkal" }
+};
+
+function createMenuCard(day, data, isToday) {
+    const cardClass = isToday ? 'today' : 'tomorrow';
+    const label = isToday ? '📅 BUGÜN' : '📆 YARIN';
+    let itemsHtml = data.items.map(item => 
+        `<div class="menu-item"><span class="item-name">${item[0]}</span><span class="item-gram">${item[1]}</span></div>`
+    ).join('');
+    return `
+        <div class="menu-card ${cardClass}">
+            <div class="card-header">
+                <div class="day-name">${label}</div>
+                <h2>${day} Ocak 2026 - ${data.day}</h2>
+            </div>
+            ${itemsHtml}
+            <div class="energy">⚡ ${data.energy}</div>
+        </div>
+    `;
+}
+
+function displayMenu() {
+    const now = new Date();
+    const day = now.getDate();
+    const month = now.getMonth();
+    const year = now.getFullYear();
+    
+    document.getElementById('dateInfo').textContent = `📆 ${day} Ocak ${year}`;
+    
+    const grid = document.getElementById('menuGrid');
+    
+    // Ocak ayı kontrolü (0 = Ocak)
+    if (month !== 0 || year !== 2026) {
+        grid.innerHTML = '<div class="menu-card"><div class="no-menu">Bu menü sadece Ocak 2026 için geçerlidir.</div></div>';
+        return;
+    }
+    
+    let html = '';
+    if (menuData[day]) {
+        html += createMenuCard(day, menuData[day], true);
+    }
+    const tomorrow = day + 1;
+    if (menuData[tomorrow]) {
+        html += createMenuCard(tomorrow, menuData[tomorrow], false);
+    }
+    
+    if (!html) {
+        html = '<div class="menu-card"><div class="no-menu">Bu gün için menü bulunamadı.</div></div>';
+    }
+    grid.innerHTML = html;
+}
+
+displayMenu();
+</script>
+</body>
+</html>
